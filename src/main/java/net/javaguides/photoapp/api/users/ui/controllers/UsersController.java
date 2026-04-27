@@ -42,7 +42,7 @@ public class UsersController {
     public String status() {
         log.info("🔄 - Checking the status of the users microservice...");
         
-        return "Working on port " + environment.getProperty("local.server.port");
+        return "Working on port " + environment.getProperty("local.server.port") + ", with token " + environment.getProperty("token.secret");
     }
 
     @PostMapping(
