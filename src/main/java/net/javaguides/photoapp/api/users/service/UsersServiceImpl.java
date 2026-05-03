@@ -1,5 +1,6 @@
 package net.javaguides.photoapp.api.users.service;
 
+import feign.FeignException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -98,8 +99,8 @@ public class UsersServiceImpl implements UsersService {
          */
         final List<AlbumResponseModel> albumsList = albumsServiceClient.getAlbums(userId);
         userDto.setAlbums(albumsList);
-
         log.info("✅ - User details found for userId: {}", userId);
+
         return userDto;
     }
 
