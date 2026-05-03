@@ -54,11 +54,22 @@ public class WebSecurity {
 
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/users")
-                        .access(new WebExpressionAuthorizationManager("hasIpAddress('"
+                        .requestMatchers(HttpMethod.POST, "/users")
+                        .access(new WebExpressionAuthorizationManager(
+                                "hasIpAddress('" + environment.getProperty("gateway.ip") + "')"))
+                        .requestMatchers(HttpMethod.GET, "/users/**")
+                        .access(new WebExpressionAuthorizationManager(
+                                "hasIpAddress('" + environment.getProperty("gateway.ip") + "')"))
+                        .requestMatchers(HttpMethod.PUT, "/users/**")
+                        .access(new WebExpressionAuthorizationManager(
+                                "hasIpAddress('127.0.0.1') or hasIpAddress('0:0:0:0:0:0:0:1') or hasIpAddress('"
+                                + environment.getProperty("gateway.ip") + "')"))
+                        .requestMatchers(HttpMethod.DELETE, "/users/**")
+                        .access(new WebExpressionAuthorizationManager(
+                                "hasIpAddress('127.0.0.1') or hasIpAddress('0:0:0:0:0:0:0:1') or hasIpAddress('"
                                 + environment.getProperty("gateway.ip") + "')"))
                         .requestMatchers("/h2-console/**").permitAll()
-                                .requestMatchers("/users/status/check").permitAll()
+                        .requestMatchers("/users/status/check").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                 )
                 .addFilter(authenticationFilter)

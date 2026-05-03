@@ -1,37 +1,29 @@
-package net.javaguides.photoapp.api.users.shared;
+package net.javaguides.photoapp.api.users.ui.model;
 
-import java.io.Serializable;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.javaguides.photoapp.api.users.ui.model.AlbumResponseModel;
 
 /**
- * UserDto
+ * UserResponseModel
  * <p>
  * Created by IntelliJ, Spring Framework Guru.
  *
  * @author architecture - pvraul
- * @version 18/04/2026 - 11:08
+ * @version 02/05/2026 - 14:29
  * @since 1.17
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserDto implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
+public class UserResponseModel {
+    private String userId;
     private String firstName;
     private String lastName;
     private String email;
-    private String password;
-
-    private String userId;
-    private String encryptedPassword;
-
     private List<AlbumResponseModel> albums;
+
 }

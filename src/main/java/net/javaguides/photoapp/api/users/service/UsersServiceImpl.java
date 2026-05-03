@@ -1,19 +1,27 @@
 package net.javaguides.photoapp.api.users.service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javaguides.photoapp.api.users.data.UserEntity;
 import net.javaguides.photoapp.api.users.data.UsersRepository;
 import net.javaguides.photoapp.api.users.shared.UserDto;
+import net.javaguides.photoapp.api.users.ui.model.AlbumResponseModel;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
+
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * UsersServiceImpl
@@ -31,6 +39,8 @@ public class UsersServiceImpl implements UsersService {
 
     private final UsersRepository usersRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final RestTemplate restTemplate;
+    private final Environment environment;
 
     @Override
     public UserDto createUser(UserDto userDetails) {
@@ -46,7 +56,7 @@ public class UsersServiceImpl implements UsersService {
         userEntity = usersRepository.save(userEntity);
 
         final UserDto userDto = modelMapper.map(userEntity, UserDto.class);
-        log.info("✅✅ - User created successfully with email: {}", userDto.getEmail());
+        log.info("✅ - User created successfully with email: {}", userDto.getEmail());
 
         return userDto;
     }
@@ -62,6 +72,30 @@ public class UsersServiceImpl implements UsersService {
         log.info("✅ - User details found for email: {}", email);
 
         return new ModelMapper().map(userEntity, UserDto.class);
+    }
+
+    @Override
+    public UserDto getUserByUserId(final String userId) {
+        log.info("🔍 - Fetching user details for userId: {}", userId);
+        final UserEntity userEntity = usersRepository.findByUserId(userId);
+        if (userEntity == null) {
+            throw new UsernameNotFoundException("User not found with id: " + userId);
+        }
+
+        UserDto userDto = new ModelMapper().map(userEntity, UserDto.class);
+
+        log.info("🔍 - Fetching albums for userId: {} from Albums Microservice", userId);
+        String albumsUrl = String.format(environment.getProperty("albums.url"), userId);
+        ResponseEntity<List<AlbumResponseModel>> albumListResponse = restTemplate.exchange(albumsUrl,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<AlbumResponseModel>>() {
+        });
+        final List<AlbumResponseModel> albumsList = albumListResponse.getBody();
+        userDto.setAlbums(albumsList);
+
+        log.info("✅ - User details found for userId: {}", userId);
+        return userDto;
     }
 
     @Override

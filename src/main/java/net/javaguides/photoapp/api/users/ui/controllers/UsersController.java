@@ -7,6 +7,7 @@ import net.javaguides.photoapp.api.users.service.UsersService;
 import net.javaguides.photoapp.api.users.shared.UserDto;
 import net.javaguides.photoapp.api.users.ui.model.CreateUserRequestModel;
 import net.javaguides.photoapp.api.users.ui.model.CreateUserResponseModel;
+import net.javaguides.photoapp.api.users.ui.model.UserResponseModel;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.core.env.Environment;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,8 +58,21 @@ public class UsersController {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
         final UserDto userDto = usersService.createUser(modelMapper.map(createUserRequestModel, UserDto.class));
-        log.info("✅ - User creation process completed for email: {}", userDto.getEmail());
+        log.info("✅✅ - User creation process completed for email: {}", userDto.getEmail());
 
         return new  ResponseEntity<>(modelMapper.map(userDto, CreateUserResponseModel.class), HttpStatus.CREATED);
     }
+
+    @GetMapping(value = "/{userId}", produces = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<UserResponseModel> getUser(@PathVariable("userId") final String userId) {
+        log.info("📥 - Retrieving user details for userId: {}", userId);
+
+        final UserDto userDto = usersService.getUserByUserId(userId);
+        final UserResponseModel returnValue = new ModelMapper().map(userDto, UserResponseModel.class);
+
+        log.info("✅✅ - User details retrieved successfully for userId: {}", userId);
+
+        return new  ResponseEntity<>(returnValue, HttpStatus.OK);
+    }
+
 }
