@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javaguides.photoapp.api.users.data.AlbumsServiceClient;
 import net.javaguides.photoapp.api.users.data.UserEntity;
 import net.javaguides.photoapp.api.users.data.UsersRepository;
 import net.javaguides.photoapp.api.users.shared.UserDto;
@@ -39,7 +40,8 @@ public class UsersServiceImpl implements UsersService {
 
     private final UsersRepository usersRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final RestTemplate restTemplate;
+    // private final RestTemplate restTemplate;
+    private final AlbumsServiceClient  albumsServiceClient;
     private final Environment environment;
 
     @Override
@@ -85,6 +87,7 @@ public class UsersServiceImpl implements UsersService {
         UserDto userDto = new ModelMapper().map(userEntity, UserDto.class);
 
         log.info("🔍 - Fetching albums for userId: {} from Albums Microservice", userId);
+        /*
         String albumsUrl = String.format(environment.getProperty("albums.url"), userId);
         ResponseEntity<List<AlbumResponseModel>> albumListResponse = restTemplate.exchange(albumsUrl,
                 HttpMethod.GET,
@@ -92,6 +95,8 @@ public class UsersServiceImpl implements UsersService {
                 new ParameterizedTypeReference<List<AlbumResponseModel>>() {
         });
         final List<AlbumResponseModel> albumsList = albumListResponse.getBody();
+         */
+        final List<AlbumResponseModel> albumsList = albumsServiceClient.getAlbums(userId);
         userDto.setAlbums(albumsList);
 
         log.info("✅ - User details found for userId: {}", userId);
