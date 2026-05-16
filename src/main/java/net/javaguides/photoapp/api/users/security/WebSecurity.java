@@ -54,23 +54,31 @@ public class WebSecurity {
 
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
+                        // Primero, endpoints públicos (más específicos primero)
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/users/status/check").permitAll()
+
+                        // Luego, endpoints con restricción de IP
                         .requestMatchers(HttpMethod.POST, "/users")
                         .access(new WebExpressionAuthorizationManager(
-                                "hasIpAddress('" + environment.getProperty("gateway.ip") + "')"))
+                                "hasIpAddress('127.0.0.1') or hasIpAddress('0:0:0:0:0:0:0:1') or hasIpAddress('"
+                                        + environment.getProperty("gateway.ip") + "')"))
                         .requestMatchers(HttpMethod.GET, "/users/**")
                         .access(new WebExpressionAuthorizationManager(
-                                "hasIpAddress('" + environment.getProperty("gateway.ip") + "')"))
+                                "hasIpAddress('127.0.0.1') or hasIpAddress('0:0:0:0:0:0:0:1') or hasIpAddress('"
+                                        + environment.getProperty("gateway.ip") + "')"))
                         .requestMatchers(HttpMethod.PUT, "/users/**")
                         .access(new WebExpressionAuthorizationManager(
                                 "hasIpAddress('127.0.0.1') or hasIpAddress('0:0:0:0:0:0:0:1') or hasIpAddress('"
-                                + environment.getProperty("gateway.ip") + "')"))
+                                        + environment.getProperty("gateway.ip") + "')"))
                         .requestMatchers(HttpMethod.DELETE, "/users/**")
                         .access(new WebExpressionAuthorizationManager(
                                 "hasIpAddress('127.0.0.1') or hasIpAddress('0:0:0:0:0:0:0:1') or hasIpAddress('"
-                                + environment.getProperty("gateway.ip") + "')"))
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/users/status/check").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
+                                        + environment.getProperty("gateway.ip") + "')"))
+
+                        // Por defecto, cualquier otra petición requiere autenticación
+                        .anyRequest().authenticated()
                 )
                 .addFilter(authenticationFilter)
                 .authenticationManager(authenticationManager)
