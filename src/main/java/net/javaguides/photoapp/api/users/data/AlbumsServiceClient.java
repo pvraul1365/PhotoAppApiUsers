@@ -1,6 +1,7 @@
 package net.javaguides.photoapp.api.users.data;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface AlbumsServiceClient {
 
     @GetMapping("/users/{id}/albums")
+    @Retry(name = "albums-ws")
     @CircuitBreaker(name="albums-ws", fallbackMethod="getAlbumsFallback")
     public List<AlbumResponseModel> getAlbums(@PathVariable String id);
 

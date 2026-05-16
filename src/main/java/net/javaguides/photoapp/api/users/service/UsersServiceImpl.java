@@ -42,7 +42,7 @@ public class UsersServiceImpl implements UsersService {
     private final UsersRepository usersRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     // private final RestTemplate restTemplate;
-    private final AlbumsServiceClient  albumsServiceClient;
+    private final AlbumsServiceClient albumsServiceClient;
     private final Environment environment;
 
     @Override
